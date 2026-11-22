@@ -1,5 +1,5 @@
 import { Client, Errors, type RiskProfile, type Commitment } from 'escrow-client';
-import { config } from '../config';
+import { getActiveConfig } from '../config';
 
 /**
  * Typed error thrown when the escrow contract configuration is missing or invalid.
@@ -46,6 +46,7 @@ export const RISK_PROFILES: Record<'safe' | 'balanced' | 'aggressive', RiskProfi
  * and seamlessly adapts Freighter's signTransaction to the Client's expected signing interface.
  */
 export function getEscrowClient(options: GetEscrowClientOptions = {}): Client {
+  const config = getActiveConfig();
   const contractId = options.contractId ?? config.escrowContractId;
   if (!contractId || !contractId.trim()) {
     throw new EscrowConfigurationError('Escrow contract ID is not configured');

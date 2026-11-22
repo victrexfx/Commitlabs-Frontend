@@ -1,13 +1,13 @@
 import { Account, BASE_FEE, Keypair, Operation, Transaction, TransactionBuilder, rpc, xdr } from '@stellar/stellar-sdk';
 import { getPublicKey, isConnected, signTransaction } from '@stellar/freighter-api';
-import { config } from '@/lib/config';
+import { getActiveConfig } from '@/lib/config';
 import { TxError, toTxError } from '@/lib/soroban/errors';
 
 const TX_TIMEOUT_SECONDS = 300;
 const POLL_ATTEMPTS = 60;
 
 function rpcServer(): rpc.Server {
-  return new rpc.Server(config.sorobanRpcUrl);
+  return new rpc.Server(getActiveConfig().sorobanRpcUrl);
 }
 
 /** Fallback source account for read-only simulations that do not mutate state. */
@@ -38,6 +38,7 @@ export interface SimulateReadResult {
 }
 
 export async function invokeContract({ method, args, source, signer }: InvokeContractParams): Promise<InvokeResult> {
+  const config = getActiveConfig();
   if (!config.escrowContractId) {
     throw new TxError('network', 'The escrow contract is not configured for this deployment.', {
       hint: 'Set NEXT_PUBLIC_ESCROW_CONTRACT_ID and redeploy.',
@@ -102,6 +103,7 @@ export async function invokeContract({ method, args, source, signer }: InvokeCon
 }
 
 export async function simulateRead({ method, args, source }: SimulateReadParams): Promise<SimulateReadResult> {
+  const config = getActiveConfig();
   if (!config.escrowContractId) {
     return { error: 'The escrow contract is not configured for this deployment.' };
   }
